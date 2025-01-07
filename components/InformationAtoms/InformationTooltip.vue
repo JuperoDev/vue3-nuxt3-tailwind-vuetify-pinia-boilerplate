@@ -2,41 +2,67 @@
     <div class="relative" ref="tooltipContainer">
       <!-- Tooltip Trigger -->
       <div>
-        <InformationSvg  @click="toggleTooltip" class="bg-zinc-700 hover:bg-zinc-900 rounded w-8 aspect-square informationSVG" />
+        <InformationSvg
+          @click="toggleTooltip"
+          :class="[ 
+            'bg-zinc-700 rounded w-8 aspect-square informationSVG',
+            isTooltipVisible ? 'bg-zinc-900' : 'hover:bg-zinc-900'
+          ]"
+        />
       </div>
   
       <!-- Tooltip Content -->
-      <div
-        v-if="isTooltipVisible"
-        class="absolute left-1/2 transform -translate-x-1/2 mt-2 flex flex-col items-center bg-zinc-800 text-zinc-100 text-sm rounded-lg shadow-lg p-3 max-w-xs z-10 select-none"
-      >
+      <transition name="fade">
         <div
-          class="absolute bottom-full -top-1 mb-1 w-3 h-3 bg-zinc-800 rotate-45 wizardPointer select-none"
-        ></div>
+          v-if="isTooltipVisible"
+          class="absolute left-1/2 transform -translate-x-1/2 mt-2 flex flex-col items-center bg-zinc-800 text-zinc-100 text-sm rounded-lg shadow-lg p-3 max-w-xs z-10 select-none"
+        >
+          <div
+            class="absolute bottom-full -top-1 mb-1 w-3 h-3 bg-zinc-800 rotate-45 wizardPointer select-none"
+          ></div>
   
-        <p>{{ truncatedTooltipText }}</p>
-        <hr class="w-64 h-px mt-5 mb-3 bg-gray-200 border-0 dark:bg-gray-700 select-none">
-        More Information
-      </div>
+          <p>{{ truncatedTooltipText }}</p>
+          <hr class="w-64 h-px mt-5 mb-3 bg-gray-200 border-0 dark:bg-gray-700 select-none">
+          <i
+            class="hover:underline underline-offset-4 cursor-pointer"
+            @click="showDialog"
+          >
+            More Information
+          </i>
+        </div>
+      </transition>
+  
+      <!-- Dialog -->
+      <SimpleDialog v-model="isDialogVisible">
+        <p>This is additional information shown in the dialog!</p>
+      </SimpleDialog>
     </div>
   </template>
   
   <script setup>
   import { ref, computed, onMounted, onUnmounted } from "vue";
   import InformationSvg from "./InformationSvg.vue";
+  import SimpleDialog from "./SimpleDialog.vue";
   
-  // Tooltip visibility state
+
   const isTooltipVisible = ref(false);
+  const isDialogVisible = ref(false);
   
-  // Reference to the tooltip container
+
   const tooltipContainer = ref(null);
   
-  // Toggle tooltip visibility
+
   const toggleTooltip = () => {
     isTooltipVisible.value = !isTooltipVisible.value;
   };
   
-  // Close tooltip when clicking outside
+ 
+  const showDialog = () => {
+    isTooltipVisible.value = false;
+    isDialogVisible.value = true;
+  };
+  
+
   const handleClickOutside = (event) => {
     if (
       tooltipContainer.value &&
@@ -46,7 +72,7 @@
     }
   };
   
-  // Attach and remove event listeners for click outside
+
   onMounted(() => {
     document.addEventListener("click", handleClickOutside);
   });
@@ -72,12 +98,20 @@
   </script>
   
   <style scoped>
-  /* div {
-    border: red 1px solid;
-  } */
-
-  .informationSVG{
+  .informationSVG {
     margin: 0 auto;
+  }
+  
+  /* Transition */
+  .fade-enter-active,
+  .fade-leave-active {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  
+  .fade-enter-from,
+  .fade-leave-to {
+    opacity: 0;
+    transform: translateY(-10px);
   }
   </style>
   
