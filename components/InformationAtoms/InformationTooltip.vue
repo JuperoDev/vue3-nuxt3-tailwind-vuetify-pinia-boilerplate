@@ -1,31 +1,59 @@
 <template>
-    <div class="relative group">
+    <div class="relative" ref="tooltipContainer">
       <!-- Tooltip Trigger -->
-      <div
-        class="bg-zinc-700 hover:bg-zinc-900 rounded w-8 aspect-square m-10 "
-      >
-        <InformationSvg />
-        
-       
+      <div>
+        <InformationSvg  @click="toggleTooltip" class="bg-zinc-700 hover:bg-zinc-900 rounded w-8 aspect-square informationSVG" />
       </div>
-       <!-- Tooltip Content -->
-       <div
-          class="absolute left-1/2 transform -translate-x-1/2  mt-2 hidden group-hover:flex flex-col items-center bg-zinc-800 text-zinc-100 text-sm rounded-lg shadow-lg p-3 max-w-xs z-10 select-text"
-        >
+  
+      <!-- Tooltip Content -->
+      <div
+        v-if="isTooltipVisible"
+        class="absolute left-1/2 transform -translate-x-1/2 mt-2 flex flex-col items-center bg-zinc-800 text-zinc-100 text-sm rounded-lg shadow-lg p-3 max-w-xs z-10 select-none"
+      >
         <div
-            class="absolute bottom-full -top-1 mb-1 w-3 h-3 bg-zinc-800 rotate-45 wizardPointer select-none	"
-          ></div>
-          
-          <p>{{ truncatedTooltipText }}</p>
-          <hr class="w-64 h-px mt-5 mb-3 bg-gray-200 border-0 dark:bg-gray-700">
-          More Information
-        </div>
+          class="absolute bottom-full -top-1 mb-1 w-3 h-3 bg-zinc-800 rotate-45 wizardPointer select-none"
+        ></div>
+  
+        <p>{{ truncatedTooltipText }}</p>
+        <hr class="w-64 h-px mt-5 mb-3 bg-gray-200 border-0 dark:bg-gray-700 select-none">
+        More Information
+      </div>
     </div>
   </template>
   
   <script setup>
-  import { ref, computed } from "vue";
+  import { ref, computed, onMounted, onUnmounted } from "vue";
   import InformationSvg from "./InformationSvg.vue";
+  
+  // Tooltip visibility state
+  const isTooltipVisible = ref(false);
+  
+  // Reference to the tooltip container
+  const tooltipContainer = ref(null);
+  
+  // Toggle tooltip visibility
+  const toggleTooltip = () => {
+    isTooltipVisible.value = !isTooltipVisible.value;
+  };
+  
+  // Close tooltip when clicking outside
+  const handleClickOutside = (event) => {
+    if (
+      tooltipContainer.value &&
+      !tooltipContainer.value.contains(event.target)
+    ) {
+      isTooltipVisible.value = false;
+    }
+  };
+  
+  // Attach and remove event listeners for click outside
+  onMounted(() => {
+    document.addEventListener("click", handleClickOutside);
+  });
+  
+  onUnmounted(() => {
+    document.removeEventListener("click", handleClickOutside);
+  });
   
   // Full text
   const tooltipText = ref(
@@ -42,4 +70,14 @@
       : tooltipText.value
   );
   </script>
+  
+  <style scoped>
+  /* div {
+    border: red 1px solid;
+  } */
+
+  .informationSVG{
+    margin: 0 auto;
+  }
+  </style>
   
